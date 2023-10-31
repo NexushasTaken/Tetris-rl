@@ -5,9 +5,10 @@
 #include <tuple>
 #include <array>
 #include "matrix_ds.hpp"
+#include "direction.hpp"
 
 enum struct TetriminoShape {
-  O, I, T, L, J, S, Z, Last,
+  None, O, I, T, L, J, S, Z, Last,
 };
 
 #define LIGHTBLUE (CLITERAL(Color){ 173, 216, 230, 255 })
@@ -15,74 +16,71 @@ enum struct TetriminoShape {
 struct __MinoData {
   TetriminoShape type;
   Color color;
-  MatrixDS data;
+  BufferArea data;
+  int row, column;
 };
 
-inline std::array<__MinoData, 8> __mino_data = {
+inline std::array<__MinoData, (int)TetriminoShape::Last> __mino_data = {
+  CLITERAL(__MinoData)({TetriminoShape::None, CLITERAL(Color){0,0,0,0}, {}}),
   CLITERAL(__MinoData)({
       TetriminoShape::O, YELLOW,
       {
         {1, 1},
         {1, 1},
-      },
+      }, 20, 4,
     }),
   CLITERAL(__MinoData)({
       TetriminoShape::I, LIGHTBLUE,
       {
         {0,0,0,0},
-        {0,0,0,0},
         {1,1,1,1},
         {0,0,0,0},
-      },
+        {0,0,0,0},
+      }, 19, 3,
     }),
   CLITERAL(__MinoData)({
       TetriminoShape::T, PURPLE,
       {
-        {0,1,0},
-        {1,1,1},
         {0,0,0},
-      },
+        {1,1,1},
+        {0,1,0},
+      }, 19, 3,
     }),
   CLITERAL(__MinoData)({
       TetriminoShape::L, ORANGE,
       {
-        {0,0,1},
-        {1,1,1},
         {0,0,0},
-      },
+        {1,1,1},
+        {1,0,0},
+      }, 19, 3,
     }),
   CLITERAL(__MinoData)({
       TetriminoShape::J, DARKBLUE,
       {
-        {1,0,0},
-        {1,1,1},
         {0,0,0},
-      },
+        {1,1,1},
+        {0,0,1},
+      }, 19, 3,
     }),
   CLITERAL(__MinoData)({
       TetriminoShape::S, GREEN,
       {
+        {0,0,0},
         {0,1,1},
         {1,1,0},
-        {0,0,0},
-      },
+      }, 19, 3,
     }),
   CLITERAL(__MinoData)({
       TetriminoShape::Z, RED,
       {
+        {0,0,0},
         {1,1,0},
         {0,1,1},
-        {0,0,0},
-      },
+      }, 19, 3,
     }),
-  CLITERAL(__MinoData)({TetriminoShape::Last, WHITE, {}}),
 };
 
 #define MINO_DATA(T) (__mino_data[(int)T])
-
-enum struct Direction {
-  Up, Down, Left, Right, Last,
-};
 
 enum struct Rotate {
   ClockWise,
@@ -100,15 +98,20 @@ struct Tetrimino {
   Tetrimino(TetriminoShape type);
 
   void draw(int offx, int offy, float size);
+  void move(Direction dt);
   void rotate(Rotate rotate);
   void flip(Flip flip);
   void swap(TetriminoShape type);
+  Vector2 calculateMinoPosition(
+      float offx, float offy,
+      int column, int row,
+      float mino_size);
   void reset();
-  MatrixDSIterator begin();
-  MatrixDSIterator end();
+  BufferAreaIterator begin();
+  BufferAreaIterator end();
 
   int column, row;
   Color color;
   TetriminoShape shape;
-  MatrixDS data;
+  BufferArea data;
 };

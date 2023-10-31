@@ -2,16 +2,16 @@
 
 #include <vector>
 
-using MatrixDS = std::vector<std::vector<int>>;
+using BufferArea = std::vector<std::vector<int>>;
 
-struct MatrixDSIterator {
-  MatrixDS *matrix;
+struct BufferAreaIterator {
+  BufferArea *matrix;
   int row;
   int col;
-  MatrixDSIterator(MatrixDS *matrix);
-  MatrixDSIterator(MatrixDS *matrix, int row);
-  bool is_end();
+  BufferAreaIterator(BufferArea *matrix);
+  BufferAreaIterator(BufferArea *matrix, int row);
+  bool isEnd();
   std::tuple<int, int, int> operator*();
-  virtual MatrixDSIterator& operator++();
-  bool operator!=(MatrixDSIterator &other);
+  virtual BufferAreaIterator& operator++();
+  bool operator!=(BufferAreaIterator &other);
 };

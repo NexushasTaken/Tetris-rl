@@ -1,31 +1,31 @@
 #include "matrix_ds.hpp"
 
-MatrixDSIterator::MatrixDSIterator(MatrixDS *matrix)
+BufferAreaIterator::BufferAreaIterator(BufferArea *matrix)
   : matrix(matrix), row(0), col(0) {}
-MatrixDSIterator::MatrixDSIterator(MatrixDS *matrix, int row)
+BufferAreaIterator::BufferAreaIterator(BufferArea *matrix, int row)
   : matrix(matrix), row(row), col(row) {}
 
-bool MatrixDSIterator::is_end() {
+bool BufferAreaIterator::isEnd() {
   return this->row == this->matrix->size();
 }
 
-bool MatrixDSIterator::operator!=(MatrixDSIterator &other) {
-  return !this->is_end();
+bool BufferAreaIterator::operator!=(BufferAreaIterator &other) {
+  return !this->isEnd();
 } 
 
-MatrixDSIterator& MatrixDSIterator::operator++() {
-  if (this->is_end()) {
+BufferAreaIterator& BufferAreaIterator::operator++() {
+  if (this->isEnd()) {
     return *this;
   }
 
   this->col++;
-  if (this->col >= this->matrix->size()) {
+  if (this->col >= this->matrix->at(0).size()) {
     this->col = 0;
     this->row++;
   }
   return *this;
 }
 
-std::tuple<int, int, int> MatrixDSIterator::operator*() {
+std::tuple<int, int, int> BufferAreaIterator::operator*() {
   return std::make_tuple(row, col, (*this->matrix)[row][col]);
 }

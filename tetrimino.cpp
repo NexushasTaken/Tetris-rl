@@ -1,31 +1,72 @@
 #include <raylib.h>
 #include <utility>
+#include <cstdio>
 #include <cmath>
 #include "tetrimino.hpp"
 #include "matrix_ds.hpp"
+#include "direction.hpp"
 
 void Tetrimino::draw(int offx, int offy, float size) {
+  // char buffer[12];
   for (auto [row, col, mino] : *this) {
+    Vector2 pos =
+      this->calculateMinoPosition(
+        offx, offy,
+        col + this->column, row + this->row,
+        size);
     if (mino) {
-      DrawRectangle(
-          col * size + offx,
-          row * size + offy,
-          size, size,
-          this->color);
-    }    
+      DrawRectangleV(pos, CLITERAL(Vector2)({size, size}), this->color);
+    }
+    // sprintf(buffer, "%d:%d", col + this->column, row + this->row);
+    // DrawText(buffer, pos.x+2, pos.y+2, 12, GRAY);
   }
 }
 
 Tetrimino::Tetrimino(TetriminoShape shape) {
-  this->column = 0;
-  this->row = 0;
   this->swap(shape);
 }
 
+Vector2 Tetrimino::calculateMinoPosition(
+    float offx, float offy,
+    int column, int row,
+    float mino_size) {
+  float x = offx;
+  float y = offy;
+  y += mino_size/2.0f + mino_size*20.0f;
+  y -= mino_size*row + mino_size;
+  x += mino_size*column;
+  return CLITERAL(Vector2){x, y};
+}
+
+
+void Tetrimino::move(Direction dt) {
+  if ((int)dt < 0 || (int)dt >= (int)Direction::Last)
+    return;
+  switch (dt) {
+    case Direction::Up:
+      this->row++;
+      break;
+    case Direction::Down:
+      this->row--;
+      break;
+    case Direction::Left:
+      this->column--;
+      break;
+    case Direction::Right:
+      this->column++;
+      break;
+    default:
+      break;
+  }
+}
+
 void Tetrimino::swap(TetriminoShape shape) {
+  auto &mino_data = MINO_DATA(shape);
+  this->column = mino_data.column;
+  this->row = mino_data.row;
   this->shape = shape;
-  this->color = MINO_DATA(shape).color;
-  auto &data = MINO_DATA(shape).data;
+  this->color = mino_data.color;
+  auto &data = mino_data.data;
   this->data = std::vector(data.begin(), data.end());
 }
 
@@ -69,10 +110,13 @@ void Tetrimino::rotate(Rotate rotate) {
   this->flip(Flip::Y);
 }
 
-MatrixDSIterator Tetrimino::begin() {
-  return MatrixDSIterator(&this->data);
+BufferAreaIterator Tetrimino::begin() {
+  return BufferAreaIterator(&this->data);
 }
 
-MatrixDSIterator Tetrimino::end() {
-  return MatrixDSIterator(&this->data, this->data.size());
+BufferAreaIterator Tetrimino::end() {
+  return BufferAreaIterator(&this->data, this->data.size());
 }
+//     #
+//    ###
+// ##########
