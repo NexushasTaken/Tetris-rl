@@ -1,68 +1,72 @@
-#include <iostream>
 #include <chrono>
-#include <cmath>
 #include "timer.hpp"
 
 using namespace std::chrono;
 
 void Timer::start() {
-  if (started)
+  if (this->started)
     return;
-  init = clock::now();
-  started = true;
+  this->init = clock::now();
+  this->started = true;
 }
 
 void Timer::reset() {
-  started = false;
-  paused = false;
+  this->started = false;
+  this->paused = false;
 }
 
 void Timer::pause() {
-  if (!started || paused)
+  if (!this->started || this->paused)
     return;
-  paused = true;
-  time_paused = clock::now();
+  this->paused = true;
+  this->time_paused = clock::now();
 }
 
 void Timer::unpause() {
-  if (!started || !paused)
+  if (!this->started || !this->paused)
     return;
-  init += clock::now() - time_paused;
-  paused = false;
+  this->init += clock::now() - this->time_paused;
+  this->paused = false;
 }
 
 bool Timer::toggle() {
-  if (!started)
+  if (!this->started)
     return false;
-  if (paused)
-    unpause();
+  if (this->paused)
+    this->unpause();
   else
-    pause();
-  return isPaused();
+    this->pause();
+  return this->isPaused();
 }
 
 bool Timer::isPaused() {
-  if (!started)
+  if (!this->started)
     return false;
-  return paused;
+  return this->paused;
+}
+
+void Timer::addTime(micro time) {
+  if (!this->started)
+    return;
+  this->init -= time;
 }
 
 Timer::micro Timer::asMicro() {
-  if (!started)
+  if (!this->started)
     return Timer::micro{0};
 
-  time_point now = paused ? time_paused : clock::now();
-  return std::chrono::duration_cast<micro>(now - init);
+  time_point now = this->paused ? this->time_paused : clock::now();
+  return std::chrono::duration_cast<micro>(now - this->init);
 }
 
 Timer::milli Timer::asMilli() {
-  if (!started)
+  if (!this->started)
     return Timer::milli{0};
-  return std::chrono::duration_cast<milli>(asMicro());
+  return std::chrono::duration_cast<milli>(this->asMicro());
 }
 
 Timer::secs Timer::asSecs() {
-  if (!started)
+  if (!this->started)
     return Timer::secs{0};
-  return std::chrono::duration_cast<secs>(asMicro());
+  return std::chrono::duration_cast<secs>(this->asMicro());
 }

@@ -87,10 +87,11 @@ enum struct Flip {
   X, Y, Last,
 };
 
+// tm = tetrimino
 struct Tetrimino {
   Tetrimino(TetriminoShape type);
 
-  void move(Direction dt);
+  void move(Direction dt, int count=1);
   void rotate(Rotate rotate);
   void flip(Flip flip);
   void swap(TetriminoShape type);

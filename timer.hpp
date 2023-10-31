@@ -1,9 +1,5 @@
-#ifndef TIMER_HPP
-#define TIMER_HPP
-
-#include <string>
+#pragma once
 #include <chrono>
-#include <map>
 
 struct Timer {
   using time_point = std::chrono::time_point<std::chrono::steady_clock>;
@@ -18,6 +14,7 @@ struct Timer {
   void unpause();
   bool toggle();
   bool isPaused();
+  void addTime(micro time);
 
   micro asMicro();
   milli asMilli();
@@ -25,8 +22,6 @@ struct Timer {
 private:
   time_point init;
   time_point time_paused;
-  bool paused;
-  bool started;
+  bool paused = false;
+  bool started = false;
 };
-
-#endif // !TIMER_HPP

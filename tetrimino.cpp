@@ -11,21 +11,19 @@ Tetrimino::Tetrimino(TetriminoShape shape) {
   this->swap(shape);
 }
 
-void Tetrimino::move(Direction dt) {
-  if ((int)dt < 0 || (int)dt >= (int)Direction::Last)
-    return;
+void Tetrimino::move(Direction dt, int count) {
   switch (dt) {
     case Direction::Up:
-      this->row++;
+      this->row += count;
       break;
     case Direction::Down:
-      this->row--;
+      this->row -= count;
       break;
     case Direction::Left:
-      this->column--;
+      this->column -= count;
       break;
     case Direction::Right:
-      this->column++;
+      this->column += count;
       break;
     default:
       break;
@@ -44,8 +42,6 @@ void Tetrimino::swap(TetriminoShape shape) {
 
 void Tetrimino::reset() {
   this->swap(this->shape);
-  this->column = 0;
-  this->row = 0;
 }
 
 void Tetrimino::flip(Flip flip) {
