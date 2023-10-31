@@ -41,6 +41,20 @@ void Maytrix::tetriminoMove(Direction dt) {
   }
 }
 
+int Maytrix::drop() {
+  int move_count = -1;
+  while (!this->tetriminoIsCollided()) {
+    this->tetrimino.move(Direction::Down);
+    move_count++;
+  }
+  this->tetrimino.move(Direction::Up);
+  return std::max(move_count, 0);
+}
+
+void Maytrix::undrop(int count) {
+  this->tetrimino.move(Direction::Up, count);
+}
+
 bool Maytrix::tetriminoIsCollided() {
   int x = this->tetrimino.column;
   int y = this->tetrimino.row;
@@ -59,10 +73,12 @@ bool Maytrix::isOccupied(int row, int col) {
   return this->buffer_area[row][col];
 }
 
-bool Maytrix::tetriminoPlaced() {
+// TODO: Hard Drop must not be instant
+bool Maytrix::hardDrop(TetriminoShape next) {
   if (this->tetriminoIsCollided()) {
     return false;
   }
+  this->drop();
   int x = this->tetrimino.column;
   int y = this->tetrimino.row;
   for (auto [row, col, mino] : this->tetrimino) {
@@ -70,11 +86,16 @@ bool Maytrix::tetriminoPlaced() {
       this->buffer_area[y+row][x+col] = (int)this->tetrimino.shape;
     }
   }
+  this->tetriminoSwap(next);
   return true;
 }
 
+void Maytrix::tetriminoSwap(TetriminoShape shape) {
+  this->tetrimino.swap(shape);
+}
+
 void Maytrix::tetriminoReset() {
-  this->tetrimino.reset();
+  this->tetriminoSwap(this->tetrimino.shape);
   std::stack<Direction> empty;
   this->mino_moved.swap(empty);
 }

@@ -12,9 +12,13 @@ struct Maytrix {
   void tetriminoMove(Direction dt);
   bool tetriminoIsCollided();
   void tetriminoReset();
+  void tetriminoSwap(TetriminoShape shape);
   void tetriminoRotate(Rotate rt);
   bool isOccupied(int row, int col);
-  bool tetriminoPlaced();
+  bool hardDrop(TetriminoShape next = TetriminoShape::O);
+  // Return fall count
+  int drop();
+  void undrop(int count);
   BufferAreaIterator begin();
   BufferAreaIterator end();
 

@@ -42,26 +42,26 @@ void Tetris::draw() {
 
   // Test Controls
   static int shape = 1;
-  if (IsKeyPressed(KEY_Q)) { shape--; }
-  if (IsKeyPressed(KEY_E)) { shape++; }
+  if (IsKeyPressed(KEY_C)) { shape--; }
+  if (IsKeyPressed(KEY_V)) { shape++; }
   if (shape >= (int)TetriminoShape::Last) {
     shape = 1;
   }
   if (shape <= 0) {
     shape = (int)TetriminoShape::Last-1;
   }
-  if (IsKeyPressed(KEY_E) || IsKeyPressed(KEY_Q)) {
+  if (IsKeyPressed(KEY_C) || IsKeyPressed(KEY_V)) {
     this->maytrix.tetrimino.swap((TetriminoShape)shape);
   }
   if (IsKeyPressed(KEY_Z)) { this->maytrix.tetriminoRotate(Rotate::CCW); }
   if (IsKeyPressed(KEY_X)) { this->maytrix.tetriminoRotate(Rotate::CW); }
 
-  if (IsKeyPressed(KEY_W)) { this->maytrix.tetriminoMove(Direction::Up); }
-  if (IsKeyPressed(KEY_S)) { this->maytrix.tetriminoMove(Direction::Down); }
-  if (IsKeyPressed(KEY_A)) { this->maytrix.tetriminoMove(Direction::Left); }
-  if (IsKeyPressed(KEY_D)) { this->maytrix.tetriminoMove(Direction::Right); }
+  if (IsKeyPressed(KEY_UP)) { this->maytrix.tetriminoMove(Direction::Up); }
+  if (IsKeyPressed(KEY_DOWN)) { this->maytrix.tetriminoMove(Direction::Down); }
+  if (IsKeyPressed(KEY_LEFT)) { this->maytrix.tetriminoMove(Direction::Left); }
+  if (IsKeyPressed(KEY_RIGHT)) { this->maytrix.tetriminoMove(Direction::Right); }
 
-  if (IsKeyPressed(KEY_SPACE)) { this->maytrix.tetriminoPlaced(); }
+  if (IsKeyPressed(KEY_SPACE)) { this->maytrix.hardDrop(); }
 
   // ---- BufferMinos ----
   for (auto [row, col, mino] : this->maytrix) {
@@ -91,16 +91,13 @@ void Tetris::draw() {
   tetrimino_draw();
 
   // ---- Ghost Tetrimino ----
-  int move_count = -1;
-  while (!this->maytrix.tetriminoIsCollided()) {
-    this->maytrix.tetrimino.move(Direction::Down);
-    move_count++;
+  int move_count = this->maytrix.drop();
+  if (move_count) {
+    this->maytrix.tetrimino.color.a = 100;
+    tetrimino_draw();
+    this->maytrix.tetrimino.color.a = 255;
+    this->maytrix.undrop(move_count);
   }
-  this->maytrix.tetrimino.move(Direction::Up);
-  this->maytrix.tetrimino.color.a = 100;
-  tetrimino_draw();
-  this->maytrix.tetrimino.color.a = 255;
-  this->maytrix.tetrimino.move(Direction::Up, move_count);
 }
 
 Vector2 Tetris::calculateMinoPosition(
