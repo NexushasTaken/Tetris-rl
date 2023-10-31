@@ -6,6 +6,7 @@
 #include <array>
 #include "matrix_ds.hpp"
 #include "direction.hpp"
+#include "rotation.hpp"
 
 enum struct TetriminoShape {
   None, O, I, T, L, J, S, Z, Last,
@@ -82,14 +83,6 @@ inline std::array<__MinoData, (int)TetriminoShape::Last> __mino_data = {
 
 #define MINO_DATA(T) (__mino_data[(int)T])
 
-enum struct Rotate {
-  ClockWise,
-  CounterClockWise,
-  CW, // ClockWise
-  CCW, // CounterClockWise
-  Last,
-};
-
 enum struct Flip {
   X, Y, Last,
 };
@@ -97,15 +90,10 @@ enum struct Flip {
 struct Tetrimino {
   Tetrimino(TetriminoShape type);
 
-  void draw(int offx, int offy, float size);
   void move(Direction dt);
   void rotate(Rotate rotate);
   void flip(Flip flip);
   void swap(TetriminoShape type);
-  Vector2 calculateMinoPosition(
-      float offx, float offy,
-      int column, int row,
-      float mino_size);
   void reset();
   BufferAreaIterator begin();
   BufferAreaIterator end();

@@ -5,39 +5,11 @@
 #include "tetrimino.hpp"
 #include "matrix_ds.hpp"
 #include "direction.hpp"
-
-void Tetrimino::draw(int offx, int offy, float size) {
-  // char buffer[12];
-  for (auto [row, col, mino] : *this) {
-    Vector2 pos =
-      this->calculateMinoPosition(
-        offx, offy,
-        col + this->column, row + this->row,
-        size);
-    if (mino) {
-      DrawRectangleV(pos, CLITERAL(Vector2)({size, size}), this->color);
-    }
-    // sprintf(buffer, "%d:%d", col + this->column, row + this->row);
-    // DrawText(buffer, pos.x+2, pos.y+2, 12, GRAY);
-  }
-}
+#include "rotation.hpp"
 
 Tetrimino::Tetrimino(TetriminoShape shape) {
   this->swap(shape);
 }
-
-Vector2 Tetrimino::calculateMinoPosition(
-    float offx, float offy,
-    int column, int row,
-    float mino_size) {
-  float x = offx;
-  float y = offy;
-  y += mino_size/2.0f + mino_size*20.0f;
-  y -= mino_size*row + mino_size;
-  x += mino_size*column;
-  return CLITERAL(Vector2){x, y};
-}
-
 
 void Tetrimino::move(Direction dt) {
   if ((int)dt < 0 || (int)dt >= (int)Direction::Last)
@@ -117,6 +89,3 @@ BufferAreaIterator Tetrimino::begin() {
 BufferAreaIterator Tetrimino::end() {
   return BufferAreaIterator(&this->data, this->data.size());
 }
-//     #
-//    ###
-// ##########
