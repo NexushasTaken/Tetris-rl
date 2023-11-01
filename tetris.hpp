@@ -1,11 +1,26 @@
 #pragma once
 #include <queue>
-#include "timer.hpp"
+#include "random.hpp"
+#include "time.hpp"
 #include "tetris_matrix.hpp"
 
 struct Tetris {
   Tetris();
+  void update();
   void draw();
+
+  bool isLockedOut();
+
+  TetriminoShape getNextShape();
+  TetriminoShape getRandomShape();
+
+  void setGameOver();
+  void startLockedDown(Time::us time);
+  void stopLockedDown();
+  void resetTimers();
+  void restart();
+
+  void fillBag();
   Vector2 calculateMinoPosition(
       float offx, float offy,
       int column, int row,
@@ -13,7 +28,11 @@ struct Tetris {
 
   Maytrix maytrix;
   std::queue<TetriminoShape> bag;
-  Timer fall_timer;
+  Time::Timer snap_timer;
+  Time::Timer locked_down_timer;
+  Time::us locked_down_time;
+  bool game_over;
+  Random random;
 
   const float mino_size;
   const Vector2 offset;

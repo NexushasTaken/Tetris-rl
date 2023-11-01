@@ -2,26 +2,30 @@
 #include <iostream>
 #include <raylib.h>
 #include <string>
-#include "../timer.hpp"
+#include "../time.hpp"
 
 using namespace std;
 
 int main() {
-  Timer timer;
+  Time::Timer timer;
   InitWindow(400, 400, "EventTimer");
   while (!WindowShouldClose()) {
     if (IsKeyPressed(KEY_P)) {
       timer.pause();
     } else if (IsKeyPressed(KEY_U)) {
       timer.unpause();
+    } else if (IsKeyPressed(KEY_E)) {
+      timer.restart();
     } else if (IsKeyPressed(KEY_R)) {
       timer.reset();
     } else if (IsKeyPressed(KEY_S)) {
       timer.start();
     } else if (IsKeyPressed(KEY_T)) {
       timer.toggle();
-    } else if (IsKeyPressed(KEY_A)) {
+    } else if (IsKeyPressed(KEY_D)) {
       timer.addTime(-10s);
+    } else if (IsKeyPressed(KEY_A)) {
+      timer.addTime(10s);
     }
     BeginDrawing();
     ClearBackground(BLACK);
@@ -30,7 +34,7 @@ int main() {
     DrawText(("Secs  : " + to_string(timer.asSecs().count())).c_str(), 0, 33, 16, WHITE);
     auto dur = std::chrono::duration<float>(timer.asMicro());
     DrawText(("Dec   : " + to_string(dur.count())).c_str(), 0, 49, 16, WHITE);
-    Timer::micro us = std::chrono::duration_cast<Timer::micro>(dur);
+    Time::us us = std::chrono::duration_cast<Time::us>(dur);
     DrawText(("Micro : " + to_string(us.count())).c_str(), 0, 65, 16, WHITE);
     EndDrawing();
   }

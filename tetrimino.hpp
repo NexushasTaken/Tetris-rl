@@ -22,7 +22,7 @@ struct __MinoData {
 };
 
 inline std::array<__MinoData, (int)TetriminoShape::Last> __mino_data = {
-  CLITERAL(__MinoData)({TetriminoShape::None, CLITERAL(Color){0,0,0,0}, {}}),
+  CLITERAL(__MinoData)({TetriminoShape::None, CLITERAL(Color){0,0,0,0}, {}, 0, 0}),
   CLITERAL(__MinoData)({
       TetriminoShape::O, YELLOW,
       {
@@ -89,13 +89,15 @@ enum struct Flip {
 
 // tm = tetrimino
 struct Tetrimino {
+  Tetrimino() = default;
   Tetrimino(TetriminoShape type);
 
   void move(Direction dt, int count=1);
   void rotate(Rotate rotate);
   void flip(Flip flip);
   void swap(TetriminoShape type);
-  void reset();
+  int at(int col, int row);
+  int length();
   BufferAreaIterator begin();
   BufferAreaIterator end();
 

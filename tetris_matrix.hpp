@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <stack>
+#include "time.hpp"
 #include "tetrimino.hpp"
 #include "direction.hpp"
 #include "rotation.hpp"
@@ -9,21 +10,24 @@
 // Tetris Matrix
 struct Maytrix {
   Maytrix();
-  void tetriminoMove(Direction dt);
+  void update();
   bool tetriminoIsCollided();
-  void tetriminoReset();
-  void tetriminoSwap(TetriminoShape shape);
-  void tetriminoRotate(Rotate rt);
-  bool isOccupied(int row, int col);
-  bool hardDrop(TetriminoShape next = TetriminoShape::O);
-  // Return fall count
-  int drop();
-  void undrop(int count);
+  void tetriminoPlace(TetriminoShape next);
+  void removeClearedLines();
+  bool isMinoOccupied(int row, int col);
+  // Return move count
+  int moveToSurface();
+  void moveToRow(int count);
+  void restart();
+
+  bool tetriminoMove(Direction dt);
+  bool tetriminoRotate(Rotate rt);
+  bool tetriminoTryMove(Direction dt);
+  bool tetriminoTryRotate(Rotate rt);
+
   BufferAreaIterator begin();
   BufferAreaIterator end();
 
-  std::stack<Direction> mino_moved;
-  std::stack<Rotate> mino_rotate;
   Tetrimino tetrimino;
   BufferArea buffer_area;
 };

@@ -1,7 +1,9 @@
 #include <raylib.h>
+#include <stdexcept>
 #include <utility>
 #include <cstdio>
 #include <cmath>
+#include <string>
 #include "tetrimino.hpp"
 #include "matrix_ds.hpp"
 #include "direction.hpp"
@@ -9,6 +11,17 @@
 
 Tetrimino::Tetrimino(TetriminoShape shape) {
   this->swap(shape);
+}
+
+int Tetrimino::at(int col, int row) {
+  return this->data[row][col];
+}
+
+int Tetrimino::length() {
+  if (this->data.size() != this->data.at(0).size()) {
+    throw std::runtime_error("data rows and columns lengths are not the same");
+  }
+  return this->data.size();
 }
 
 void Tetrimino::move(Direction dt, int count) {
@@ -31,6 +44,9 @@ void Tetrimino::move(Direction dt, int count) {
 }
 
 void Tetrimino::swap(TetriminoShape shape) {
+  if ((int)shape < (int)TetriminoShape::None || (int)shape >= (int)TetriminoShape::Last) {
+    throw std::string("invalid shape: ") + std::to_string((int)shape);
+  }
   auto &mino_data = MINO_DATA(shape);
   this->column = mino_data.column;
   this->row = mino_data.row;
@@ -38,10 +54,6 @@ void Tetrimino::swap(TetriminoShape shape) {
   this->color = mino_data.color;
   auto &data = mino_data.data;
   this->data = std::vector(data.begin(), data.end());
-}
-
-void Tetrimino::reset() {
-  this->swap(this->shape);
 }
 
 void Tetrimino::flip(Flip flip) {
@@ -62,12 +74,10 @@ void Tetrimino::flip(Flip flip) {
 
 void Tetrimino::rotate(Rotate rotate) {
   std::vector<std::vector<int>> old_data(this->data.begin(), this->data.end());
-  int i, j, length;
+  int length = data.size();
 
-  length = data.size();
-
-  for (i = 0; i < length; i++) {
-    for (j = 0; j < length; j++) {
+  for (int i = 0; i < length; i++) {
+    for (int j = 0; j < length; j++) {
       if (rotate == Rotate::CW) {
         this->data[j][i] = old_data[length-i-1][length-j-1];
       } else {
