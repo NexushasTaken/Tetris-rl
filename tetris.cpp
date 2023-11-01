@@ -37,12 +37,8 @@ void Tetris::update() {
   if (IsKeyPressed(KEY_LEFT)) { this->maytrix.tetriminoMove(Direction::Left); }
   if (IsKeyPressed(KEY_RIGHT)) { this->maytrix.tetriminoMove(Direction::Right); }
 
-  if (IsKeyPressed(KEY_SPACE)) {
-    this->maytrix.moveToSurface();
-    this->locked_down_timer.start(10us);
-  }
-
-  if (this->locked_down_timer.isElapsed(true)) {
+  // Handle Locked Down
+  if (this->locked_down_timer.isElapsed()) {
     if (this->isLockedOut()) {
       this->setGameOver();
     }
@@ -55,12 +51,37 @@ void Tetris::update() {
     this->snap_timer.restart();
   }
 
-  // Fall Logic
-  std::cout << this->locked_down_timer.asMicro().count() << std::endl;
-  while (this->snap_timer.isElapsed(true)) {
-    if (!this->maytrix.tetriminoMove(Direction::Down)) {
-      this->locked_down_timer.start(500ms);
+  // Drops
+  auto start_locked_down = [this](Time::us delay, bool force=false) {
+    if (force) {
+      this->maytrix.moveToSurface();
     }
+    if (this->maytrix.tetriminoIsOnSurface()) {
+      this->locked_down_timer.start(delay);
+    }
+  };
+  bool soft_drop = IsKeyDown(KEY_DOWN);
+  bool hard_drop = IsKeyPressed(KEY_SPACE);
+  if (soft_drop) {
+    std::cout << "soft_drop" << std::endl;
+    this->soft_drop_timer.start(Time::ms(this->fall_speed/20ms));
+    if (this->soft_drop_timer.isElapsed(true)) {
+      this->maytrix.tetriminoMove(Direction::Down);
+      start_locked_down(this->classic_drop_speed);
+    }
+  } else if (hard_drop) {
+    std::cout << "hard drop" << std::endl;
+    start_locked_down(this->hard_drop_speed, true);
+  } else {
+    std::cout << "falling" << std::endl;
+    while (this->snap_timer.isElapsed(true)) {
+      this->maytrix.tetriminoMove(Direction::Down);
+    }
+    start_locked_down(this->classic_drop_speed);
+  }
+  if (IsKeyReleased(KEY_DOWN)) {
+    this->soft_drop_timer.reset();
+    this->snap_timer.restart();
   }
 }
 
@@ -141,7 +162,7 @@ void Tetris::draw() {
 
 
 bool Tetris::isLockedOut() {
-  if (this->maytrix.tetriminoTryMove(Direction::Down)) {
+  if (this->maytrix.tetriminoCanMove(Direction::Down)) {
     return false;
   }
   int mino_ypos = 0;
@@ -179,7 +200,7 @@ void Tetris::setGameOver() {
 void Tetris::resetTimers() {
   this->snap_timer.reset();
   this->locked_down_timer.reset();
-  this->auto_repeat_timer.reset();
+  this->soft_drop_timer.reset();
 }
 
 void Tetris::restart() {

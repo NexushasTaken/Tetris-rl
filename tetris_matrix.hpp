@@ -20,10 +20,11 @@ struct Maytrix {
   void moveToRow(int count);
   void restart();
 
-  bool tetriminoMove(Direction dt);
+  bool tetriminoIsOnSurface();
+  bool tetriminoMove(Direction dt, int count=1);
   bool tetriminoRotate(Rotate rt);
-  bool tetriminoTryMove(Direction dt);
-  bool tetriminoTryRotate(Rotate rt);
+  bool tetriminoCanMove(Direction dt);
+  bool tetriminoCanRotate(Rotate rt);
 
   BufferAreaIterator begin();
   BufferAreaIterator end();

@@ -107,22 +107,26 @@ bool Maytrix::tetriminoRotate(Rotate rt) {
   return true;
 }
 
-bool Maytrix::tetriminoMove(Direction dt) {
-  if (this->tetriminoTryMove(dt)) {
-    this->tetrimino.move(dt);
+bool Maytrix::tetriminoMove(Direction dt, int count) {
+  if (this->tetriminoCanMove(dt)) {
+    this->tetrimino.move(dt, count);
     return true;
   }
   return false;
 }
 
-bool Maytrix::tetriminoTryMove(Direction dt) {
+bool Maytrix::tetriminoIsOnSurface() {
+  return !this->tetriminoCanMove(Direction::Down);
+}
+
+bool Maytrix::tetriminoCanMove(Direction dt) {
   this->tetrimino.move(dt);
   bool can_move = !this->tetriminoIsCollided();
   this->tetrimino.move(directionInverse(dt));
   return can_move;
 }
 
-bool Maytrix::tetriminoTryRotate(Rotate rt) {
+bool Maytrix::tetriminoCanRotate(Rotate rt) {
   this->tetrimino.rotate(rt);
   bool can_rotate = !this->tetriminoIsCollided();
   this->tetrimino.rotate(rotateInverse(rt));

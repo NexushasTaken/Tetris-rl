@@ -79,21 +79,16 @@ namespace Time {
 
 
   void IncrementalTimer::start(Time::us delay) {
-    this->timer.start();
+    if (this->isStarted()) {
+      return;
+    }
+    Timer::start();
     this->delay = delay;
   }
 
   void IncrementalTimer::reset() {
-    this->timer.reset();
+    Timer::reset();
     this->delay = 1us;
-  }
-
-  void IncrementalTimer::restart() {
-    this->timer.restart();
-  }
-
-  bool IncrementalTimer::isStarted() {
-    return this->timer.isStarted();
   }
 
   bool IncrementalTimer::isElapsed(bool decr) {
@@ -101,16 +96,12 @@ namespace Time {
       return false;
     }
 
-    if (this->timer.asMicro() > this->delay) {
+    if (this->asMicro() > this->delay) {
       if (decr) {
-        this->timer.addTime(-this->delay);
+        this->addTime(-this->delay);
       }
       return true;
     }
     return false;
-  }
-
-  Time::us IncrementalTimer::asMicro() {
-    return timer.asMicro();
   }
 }

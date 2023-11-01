@@ -31,15 +31,11 @@ namespace Time {
     bool started = false;
   };
 
-  struct IncrementalTimer {
+  struct IncrementalTimer : Timer {
     void start(Time::us delay);
     void reset();
-    void restart();
-    bool isStarted();
     bool isElapsed(bool decr=false);
-    Time::us asMicro();
   private:
-    Time::Timer timer;
     Time::us delay = 1us;
   };
 }
