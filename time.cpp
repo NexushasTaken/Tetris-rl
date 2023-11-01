@@ -91,6 +91,16 @@ namespace Time {
     this->delay = 1us;
   }
 
+  void IncrementalTimer::update(bool decr) {
+    if (this->isElapsed(decr) && this->callback != nullptr) {
+      this->callback(*this);
+    }
+  }
+
+  void IncrementalTimer::setCallback(Callback cb) {
+    this->callback.swap(cb);
+  }
+
   bool IncrementalTimer::isElapsed(bool decr) {
     if (!this->isStarted()) {
       return false;

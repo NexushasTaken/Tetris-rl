@@ -1,5 +1,6 @@
 #pragma once
 #include <chrono>
+#include <functional>
 
 using namespace std::chrono_literals;
 
@@ -32,10 +33,14 @@ namespace Time {
   };
 
   struct IncrementalTimer : Timer {
+    using Callback = std::function<void(IncrementalTimer &timer)>;
     void start(Time::us delay);
     void reset();
     bool isElapsed(bool decr=false);
+    void update(bool decr);
+    void setCallback(Callback cb);
   private:
+    Callback callback;
     Time::us delay = 1us;
   };
 }

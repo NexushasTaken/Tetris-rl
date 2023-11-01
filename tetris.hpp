@@ -18,6 +18,7 @@ struct Tetris {
   void resetTimers();
   void restart();
 
+  void startLockedDown(Time::us delay, bool force);
   void fillBag();
   Vector2 calculateMinoPosition(
       float offx, float offy,
