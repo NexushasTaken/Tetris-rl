@@ -27,7 +27,7 @@ void Tetris::update() {
   if (IsKeyPressed(KEY_C) || IsKeyPressed(KEY_V)) {
     this->maytrix.tetrimino.swap((TetriminoShape)shape);
     this->locked_down_timer.reset();
-    this->snap_timer.restart();
+    this->snap_timer.reset();
   }
   if (IsKeyPressed(KEY_Z)) { this->maytrix.tetriminoRotate(Rotate::CW); }
   if (IsKeyPressed(KEY_X)) { this->maytrix.tetriminoRotate(Rotate::CCW); }
@@ -39,11 +39,10 @@ void Tetris::update() {
 
   if (IsKeyPressed(KEY_SPACE)) {
     this->maytrix.moveToSurface();
-    this->startLockedDown(10us);
+    this->locked_down_timer.start(10us);
   }
 
-  if (this->locked_down_timer.isStarted() &&
-      this->locked_down_timer.asMilli() > this->locked_down_time) {
+  if (this->locked_down_timer.isElapsed(true)) {
     if (this->isLockedOut()) {
       this->setGameOver();
     }
@@ -54,16 +53,14 @@ void Tetris::update() {
     this->maytrix.removeClearedLines();
     this->locked_down_timer.reset();
     this->snap_timer.restart();
-    locked_down_timer.reset();
   }
 
   // Fall Logic
-  const auto snap_delay = 1s;
-  while (this->snap_timer.asMilli() > snap_delay) {
+  std::cout << this->locked_down_timer.asMicro().count() << std::endl;
+  while (this->snap_timer.isElapsed(true)) {
     if (!this->maytrix.tetriminoMove(Direction::Down)) {
-      this->startLockedDown(1s/2);
+      this->locked_down_timer.start(500ms);
     }
-    this->snap_timer.addTime(-snap_delay);
   }
 }
 
@@ -179,19 +176,10 @@ void Tetris::setGameOver() {
   this->resetTimers();
 }
 
-void Tetris::startLockedDown(Time::us time) {
-  this->locked_down_timer.start();
-  this->locked_down_time = time;
-}
-
-void Tetris::stopLockedDown() {
-  this->locked_down_timer.reset();
-  this->locked_down_time = 0us;
-}
-
 void Tetris::resetTimers() {
   this->snap_timer.reset();
-  this->stopLockedDown();
+  this->locked_down_timer.reset();
+  this->auto_repeat_timer.reset();
 }
 
 void Tetris::restart() {
@@ -200,7 +188,7 @@ void Tetris::restart() {
   this->fillBag();
   this->maytrix.restart();
   this->maytrix.tetrimino.swap(this->getRandomShape());
-  snap_timer.start();
+  this->snap_timer.start(1s);
 }
 
 

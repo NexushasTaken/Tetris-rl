@@ -15,8 +15,6 @@ struct Tetris {
   TetriminoShape getRandomShape();
 
   void setGameOver();
-  void startLockedDown(Time::us time);
-  void stopLockedDown();
   void resetTimers();
   void restart();
 
@@ -28,9 +26,9 @@ struct Tetris {
 
   Maytrix maytrix;
   std::queue<TetriminoShape> bag;
-  Time::Timer snap_timer;
-  Time::Timer locked_down_timer;
-  Time::us locked_down_time;
+  Time::IncrementalTimer snap_timer;
+  Time::IncrementalTimer locked_down_timer;
+  Time::IncrementalTimer auto_repeat_timer;
   bool game_over;
   Random random;
 

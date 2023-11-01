@@ -76,4 +76,41 @@ namespace Time {
       return Time::s{0};
     return std::chrono::duration_cast<Time::s>(this->asMicro());
   }
+
+
+  void IncrementalTimer::start(Time::us delay) {
+    this->timer.start();
+    this->delay = delay;
+  }
+
+  void IncrementalTimer::reset() {
+    this->timer.reset();
+    this->delay = 1us;
+  }
+
+  void IncrementalTimer::restart() {
+    this->timer.restart();
+  }
+
+  bool IncrementalTimer::isStarted() {
+    return this->timer.isStarted();
+  }
+
+  bool IncrementalTimer::isElapsed(bool decr) {
+    if (!this->isStarted()) {
+      return false;
+    }
+
+    if (this->timer.asMicro() > this->delay) {
+      if (decr) {
+        this->timer.addTime(-this->delay);
+      }
+      return true;
+    }
+    return false;
+  }
+
+  Time::us IncrementalTimer::asMicro() {
+    return timer.asMicro();
+  }
 }
