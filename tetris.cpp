@@ -27,28 +27,45 @@ void Tetris::update() {
   if (IsKeyPressed(KEY_C) || IsKeyPressed(KEY_V)) {
     this->maytrix.tetrimino.swap((TetriminoShape)shape);
     this->locked_down_timer.reset();
-    this->snap_timer.reset();
+    this->classic_drop_timer.restart();
   }
   if (IsKeyPressed(KEY_Z)) { this->maytrix.tetriminoRotate(Rotate::CW); }
   if (IsKeyPressed(KEY_X)) { this->maytrix.tetriminoRotate(Rotate::CCW); }
 
-  if (IsKeyPressed(KEY_UP)) { this->maytrix.tetriminoMove(Direction::Up); }
-  if (IsKeyPressed(KEY_DOWN)) { this->maytrix.tetriminoMove(Direction::Down); }
-  if (IsKeyPressed(KEY_LEFT)) { this->maytrix.tetriminoMove(Direction::Left); }
-  if (IsKeyPressed(KEY_RIGHT)) { this->maytrix.tetriminoMove(Direction::Right); }
+  if (IsKeyPressed(KEY_UP)) { this->maytrix.tetriminoMove(Axis::Y, 1); }
 
-  this->soft_drop_timer.update(true);
-  this->locked_down_timer.update(false);
-  this->snap_timer.update(true);
+  if (IsKeyPressed(KEY_LEFT)) { this->maytrix.tetriminoMove(Axis::X, -1); }
+  if (IsKeyPressed(KEY_RIGHT)) { this->maytrix.tetriminoMove(Axis::X, 1); }
+  int down_lr = -IsKeyDown(KEY_LEFT) + IsKeyDown(KEY_RIGHT);
+  if (down_lr != 0) {
+    this->auto_repeat_delay_timer.update();
+    this->auto_repeat_timer.update();
+    this->auto_repeat_delay_timer.start(this->auto_repeat_delay_speed);
+    this->auto_repeat_delay_timer.setCallback(
+        [this, down_lr](auto &timer) {
+          this->auto_repeat_timer.start(this->auto_repeat_speed);
+          this->auto_repeat_timer.setCallback(
+              [this, down_lr](auto &timer) {
+                this->maytrix.tetriminoMove(Axis::X, down_lr);
+              });
+        });
+  } else {
+    auto_repeat_delay_timer.reset();
+    auto_repeat_timer.reset();
+  }
+
+  this->locked_down_timer.update();
 
   // Drops
   bool soft_drop = IsKeyDown(KEY_DOWN);
   bool hard_drop = IsKeyPressed(KEY_SPACE);
   if (soft_drop) {
+    this->soft_drop_timer.update();
     this->soft_drop_timer.start(Time::ms(this->fall_speed/20ms));
   } else if (hard_drop) {
     startLockedDown(this->hard_drop_speed, true);
   } else {
+    this->classic_drop_timer.update();
     startLockedDown(this->classic_drop_speed, false);
   }
 }
@@ -139,7 +156,7 @@ void Tetris::draw() {
 
 
 bool Tetris::isLockedOut() {
-  if (this->maytrix.tetriminoCanMove(Direction::Down)) {
+  if (this->maytrix.tetriminoCanMove(Axis::Y, -1)) {
     return false;
   }
   int mino_ypos = 0;
@@ -175,9 +192,16 @@ void Tetris::setGameOver() {
 }
 
 void Tetris::resetTimers() {
-  this->snap_timer.reset();
+  this->classic_drop_timer.reset();
   this->locked_down_timer.reset();
   this->soft_drop_timer.reset();
+  this->auto_repeat_timer.reset();
+  this->auto_repeat_delay_timer.reset();
+
+  this->auto_repeat_timer.setResetAfterElapsed(true);
+  this->locked_down_timer.setResetAfterElapsed(true);
+  this->soft_drop_timer.setResetAfterElapsed(true);
+
   this->locked_down_timer.setCallback(
       [this](Time::IncrementalTimer &timer) {
         if (this->isLockedOut()) {
@@ -189,20 +213,19 @@ void Tetris::resetTimers() {
         }
         this->maytrix.removeClearedLines();
         this->locked_down_timer.reset();
-        this->snap_timer.restart();
+        this->classic_drop_timer.restart();
       });
-  this->snap_timer.setCallback(
+  this->classic_drop_timer.setCallback(
       [this](Time::IncrementalTimer &timer){
-        this->maytrix.tetriminoMove(Direction::Down);
+        this->maytrix.tetriminoMove(Axis::Y, -1);
       });
   this->soft_drop_timer.setCallback(
-      [this](Time::IncrementalTimer &timer){
-        if (!IsKeyDown(KEY_DOWN)) {
-          this->soft_drop_timer.reset();
-          return;
-        }
-        this->maytrix.tetriminoMove(Direction::Down);
+      [this](auto &timer) {
+        this->maytrix.tetriminoMove(Axis::Y, -1);
         this->startLockedDown(this->classic_drop_speed, false);
+        if (IsKeyUp(KEY_DOWN)) {
+          this->soft_drop_timer.reset();
+        }
       });
 }
 
@@ -212,7 +235,7 @@ void Tetris::restart() {
   this->fillBag();
   this->maytrix.restart();
   this->maytrix.tetrimino.swap(this->getRandomShape());
-  this->snap_timer.start(1s);
+  this->classic_drop_timer.start(1s);
 }
 
 

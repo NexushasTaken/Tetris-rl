@@ -49,7 +49,7 @@ int main() {
     next();
     DrawText(("IsElapsed : "s + (inc_timer.isElapsed() ? "True" : "False")).c_str(), 0, next(), size, WHITE);
     DrawText(("time(us): "s + std::to_string(inc_timer.asMicro().count())).c_str(), 0, next(), size, WHITE);
-    inc_timer.isElapsed(true);
+    inc_timer.isElapsed();
     EndDrawing();
   }
   CloseWindow();

@@ -36,11 +36,16 @@ namespace Time {
     using Callback = std::function<void(IncrementalTimer &timer)>;
     void start(Time::us delay);
     void reset();
-    bool isElapsed(bool decr=false);
-    void update(bool decr);
+    bool isElapsed();
+    void update();
     void setCallback(Callback cb);
+    void setBeforeCallback(Callback cb);
+    void setResetAfterElapsed(bool reset);
+    bool isContinous();
   private:
     Callback callback;
+    Callback beforeCallback;
+    bool resetAfterElapsed = false;
     Time::us delay = 1us;
   };
 }

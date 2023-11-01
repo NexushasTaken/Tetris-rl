@@ -5,7 +5,7 @@
 #include <tuple>
 #include <array>
 #include "matrix_ds.hpp"
-#include "direction.hpp"
+#include "axis.hpp"
 #include "rotation.hpp"
 
 enum struct TetriminoShape {
@@ -83,18 +83,14 @@ inline std::array<__MinoData, (int)TetriminoShape::Last> __mino_data = {
 
 #define MINO_DATA(T) (__mino_data[(int)T])
 
-enum struct Flip {
-  X, Y, Last,
-};
-
 // tm = tetrimino
 struct Tetrimino {
   Tetrimino() = default;
   Tetrimino(TetriminoShape type);
 
-  void move(Direction dt, int count=1);
+  void move(Axis dt, int count);
   void rotate(Rotate rotate);
-  void flip(Flip flip);
+  void flip(Axis flip);
   void swap(TetriminoShape type);
   int at(int col, int row);
   int length();

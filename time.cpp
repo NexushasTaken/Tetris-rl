@@ -91,9 +91,17 @@ namespace Time {
     this->delay = 1us;
   }
 
-  void IncrementalTimer::update(bool decr) {
-    if (this->isElapsed(decr) && this->callback != nullptr) {
-      this->callback(*this);
+  void IncrementalTimer::update() {
+    if (this->beforeCallback != nullptr) {
+      this->beforeCallback(*this);
+    }
+    if (this->isElapsed()) {
+      if (this->callback != nullptr) {
+        this->callback(*this);
+      }
+      if (this->resetAfterElapsed) {
+        this->reset();
+      }
     }
   }
 
@@ -101,17 +109,29 @@ namespace Time {
     this->callback.swap(cb);
   }
 
-  bool IncrementalTimer::isElapsed(bool decr) {
+  void IncrementalTimer::setBeforeCallback(Callback cb) {
+    this->beforeCallback.swap(cb);
+  }
+
+  void IncrementalTimer::setResetAfterElapsed(bool reset) {
+    this->resetAfterElapsed = reset;
+  }
+
+  bool IncrementalTimer::isElapsed() {
     if (!this->isStarted()) {
       return false;
     }
 
     if (this->asMicro() > this->delay) {
-      if (decr) {
+      if (this->isContinous()) {
         this->addTime(-this->delay);
       }
       return true;
     }
     return false;
+  }
+
+  bool IncrementalTimer::isContinous() {
+    return !this->resetAfterElapsed;
   }
 }

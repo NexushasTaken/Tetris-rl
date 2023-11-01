@@ -4,7 +4,7 @@
 #include <stack>
 #include "time.hpp"
 #include "tetrimino.hpp"
-#include "direction.hpp"
+#include "axis.hpp"
 #include "rotation.hpp"
 
 // Tetris Matrix
@@ -21,9 +21,9 @@ struct Maytrix {
   void restart();
 
   bool tetriminoIsOnSurface();
-  bool tetriminoMove(Direction dt, int count=1);
+  bool tetriminoMove(Axis dt, int count);
   bool tetriminoRotate(Rotate rt);
-  bool tetriminoCanMove(Direction dt);
+  bool tetriminoCanMove(Axis dt, int count);
   bool tetriminoCanRotate(Rotate rt);
 
   BufferAreaIterator begin();

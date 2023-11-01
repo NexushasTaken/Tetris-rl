@@ -6,7 +6,7 @@
 #include <string>
 #include "tetrimino.hpp"
 #include "matrix_ds.hpp"
-#include "direction.hpp"
+#include "axis.hpp"
 #include "rotation.hpp"
 
 Tetrimino::Tetrimino(TetriminoShape shape) {
@@ -24,18 +24,12 @@ int Tetrimino::length() {
   return this->data.size();
 }
 
-void Tetrimino::move(Direction dt, int count) {
+void Tetrimino::move(Axis dt, int count) {
   switch (dt) {
-    case Direction::Up:
+    case Axis::Y:
       this->row += count;
       break;
-    case Direction::Down:
-      this->row -= count;
-      break;
-    case Direction::Left:
-      this->column -= count;
-      break;
-    case Direction::Right:
+    case Axis::X:
       this->column += count;
       break;
     default:
@@ -56,14 +50,14 @@ void Tetrimino::swap(TetriminoShape shape) {
   this->data = std::vector(data.begin(), data.end());
 }
 
-void Tetrimino::flip(Flip flip) {
+void Tetrimino::flip(Axis flip) {
   int i, j, half, length;
 
   length = this->data.size();
   half = (int)std::floor(length/2.0);
   for (i = 0; i < half; i++) {
     for (j = 0; j < length; j++) {
-      if (flip == Flip::X) {
+      if (flip == Axis::X) {
         std::swap(this->data[j][i], this->data[j][length-i-1]);
       } else {
         std::swap(this->data[i][j], this->data[length-i-1][j]);
@@ -85,7 +79,7 @@ void Tetrimino::rotate(Rotate rotate) {
       }
     }
   }
-  this->flip(Flip::Y);
+  this->flip(Axis::Y);
 }
 
 BufferAreaIterator Tetrimino::begin() {

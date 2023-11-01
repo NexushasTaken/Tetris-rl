@@ -3,6 +3,7 @@
 #include <functional>
 #include "tetris_matrix.hpp"
 #include "rotation.hpp"
+#include "axis.hpp"
 
 Maytrix::Maytrix() {
   // this->buffer_area = BufferArea(44, std::vector<int>(10));
@@ -48,17 +49,17 @@ void Maytrix::removeClearedLines() {
 int Maytrix::moveToSurface() {
   int move_count = -1;
   while (!this->tetriminoIsCollided()) {
-    this->tetrimino.move(Direction::Down);
+    this->tetrimino.move(Axis::Y, -1);
     move_count++;
   }
   if (move_count >= 0) {
-    this->tetrimino.move(Direction::Up);
+    this->tetrimino.move(Axis::Y, 1);
   }
   return std::max(move_count, 0);
 }
 
 void Maytrix::moveToRow(int count) {
-  this->tetrimino.move(Direction::Up, count);
+  this->tetrimino.move(Axis::Y, count);
   if (this->tetriminoIsCollided()) {
     throw std::runtime_error("Maytrix::moveToRow - Tetrimino is collided!");
   }
@@ -107,8 +108,8 @@ bool Maytrix::tetriminoRotate(Rotate rt) {
   return true;
 }
 
-bool Maytrix::tetriminoMove(Direction dt, int count) {
-  if (this->tetriminoCanMove(dt)) {
+bool Maytrix::tetriminoMove(Axis dt, int count) {
+  if (this->tetriminoCanMove(dt, count)) {
     this->tetrimino.move(dt, count);
     return true;
   }
@@ -116,13 +117,13 @@ bool Maytrix::tetriminoMove(Direction dt, int count) {
 }
 
 bool Maytrix::tetriminoIsOnSurface() {
-  return !this->tetriminoCanMove(Direction::Down);
+  return !this->tetriminoCanMove(Axis::Y, -1);
 }
 
-bool Maytrix::tetriminoCanMove(Direction dt) {
-  this->tetrimino.move(dt);
+bool Maytrix::tetriminoCanMove(Axis dt, int count) {
+  this->tetrimino.move(dt, count);
   bool can_move = !this->tetriminoIsCollided();
-  this->tetrimino.move(directionInverse(dt));
+  this->tetrimino.move(dt, -count);
   return can_move;
 }
 
