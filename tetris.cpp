@@ -204,6 +204,10 @@ void Tetris::resetTimers() {
 
   this->locked_down_timer.setCallback(
       [this](Time::IncrementalTimer &timer) {
+        if (!this->maytrix.tetriminoIsOnSurface()) {
+          return;
+        }
+
         if (this->isLockedOut()) {
           this->setGameOver();
         }
