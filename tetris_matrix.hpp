@@ -10,7 +10,6 @@
 // Tetris Matrix
 struct Maytrix {
   Maytrix();
-  void update();
   bool tetriminoIsCollided();
   void tetriminoPlace(TetriminoShape next);
   void removeClearedLines();
@@ -25,6 +24,9 @@ struct Maytrix {
   bool tetriminoRotate(Rotate rt);
   bool tetriminoCanMove(Axis dt, int count);
   bool tetriminoCanRotate(Rotate rt);
+
+  int rowLength();
+  int columnLength();
 
   BufferAreaIterator begin();
   BufferAreaIterator end();

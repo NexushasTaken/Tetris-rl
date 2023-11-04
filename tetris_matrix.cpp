@@ -20,10 +20,6 @@ Maytrix::Maytrix() {
   }
 }
 
-void Maytrix::update() {
-
-}
-
 void Maytrix::removeClearedLines() {
   int last_line = 0;
   for (int i = 0; i < this->buffer_area.size(); i++) {
@@ -132,6 +128,13 @@ bool Maytrix::tetriminoCanRotate(Rotate rt) {
   bool can_rotate = !this->tetriminoIsCollided();
   this->tetrimino.rotate(rotateInverse(rt));
   return can_rotate;
+}
+
+int Maytrix::rowLength() {
+  return this->buffer_area.size();
+}
+int Maytrix::columnLength() {
+  return this->buffer_area.at(0).size();
 }
 
 BufferAreaIterator Maytrix::begin() {

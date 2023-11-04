@@ -3,9 +3,9 @@
 #include "time.hpp"
 #include "tetris.hpp"
 
-Tetris::Tetris()
-  : mino_size(20),
-    offset(CLITERAL(Vector2){0, 0}) {
+Tetris::Tetris(float mino_size, Vector2 offset) {
+  this->mino_size = mino_size;
+  this->offset = offset;
   this->restart();
 }
 
@@ -16,7 +16,6 @@ void Tetris::update() {
   if (game_over) {
     return;
   }
-  this->maytrix.update();
 
   static int shape = 1;
   if (IsKeyPressed(KEY_C)) { shape--; }
@@ -36,6 +35,7 @@ void Tetris::update() {
 
   if (IsKeyPressed(KEY_LEFT)) { this->maytrix.tetriminoMove(Axis::X, -1); }
   if (IsKeyPressed(KEY_RIGHT)) { this->maytrix.tetriminoMove(Axis::X, 1); }
+
   int down_lr = -IsKeyDown(KEY_LEFT) + IsKeyDown(KEY_RIGHT);
   if (down_lr != 0) {
     this->auto_repeat_delay_timer.update();
@@ -61,12 +61,12 @@ void Tetris::update() {
   bool hard_drop = IsKeyPressed(KEY_SPACE);
   if (soft_drop) {
     this->soft_drop_timer.update();
-    this->soft_drop_timer.start(Time::ms(this->fall_speed/20ms));
+    this->soft_drop_timer.start(Time::ms(this->fall_speed/this->fall_speed_multiplier));
   } else if (hard_drop) {
-    startLockedDown(this->hard_drop_speed, true);
+    startLockedDown(this->hard_locked_down_speed, true);
   } else {
     this->classic_drop_timer.update();
-    startLockedDown(this->classic_drop_speed, false);
+    startLockedDown(this->classic_locked_down_speed, false);
   }
 }
 
@@ -93,8 +93,8 @@ void Tetris::draw() {
 
   // ---- BufferVerticalLines ----
   rect.width = 2;
-  for (int i = 0; i < this->maytrix.buffer_area[0].size(); i++) {
-    if (!i || i >= this->maytrix.buffer_area.size()-1) {
+  for (int i = 0; i < this->maytrix.columnLength(); i++) {
+    if (!i || i >= this->maytrix.rowLength()-1) {
       continue;
     }
     rect.x = i * mino_size - 1 + this->offset.x;
@@ -172,8 +172,8 @@ bool Tetris::isLockedOut() {
 
 TetriminoShape Tetris::getNextShape() {
   auto next = this->bag.front();
-  this->bag.pop();
-  this->bag.push(this->getRandomShape());
+  this->bag.pop_front();
+  this->bag.push_back(this->getRandomShape());
   return next;
 }
 
@@ -207,7 +207,6 @@ void Tetris::resetTimers() {
         if (!this->maytrix.tetriminoIsOnSurface()) {
           return;
         }
-
         if (this->isLockedOut()) {
           this->setGameOver();
         }
@@ -226,7 +225,7 @@ void Tetris::resetTimers() {
   this->soft_drop_timer.setCallback(
       [this](auto &timer) {
         this->maytrix.tetriminoMove(Axis::Y, -1);
-        this->startLockedDown(this->classic_drop_speed, false);
+        this->startLockedDown(this->classic_locked_down_speed, false);
         if (IsKeyUp(KEY_DOWN)) {
           this->soft_drop_timer.reset();
         }
@@ -239,13 +238,14 @@ void Tetris::restart() {
   this->fillBag();
   this->maytrix.restart();
   this->maytrix.tetrimino.swap(this->getRandomShape());
+  this->holded_shape = this->getRandomShape();
   this->classic_drop_timer.start(1s);
 }
 
 
 void Tetris::fillBag() {
   while (this->bag.size() < 8) {
-    this->bag.push(this->getRandomShape());
+    this->bag.push_back(this->getRandomShape());
   }
 }
 
@@ -260,4 +260,3 @@ Vector2 Tetris::calculateMinoPosition(
   x += mino_size*column;
   return CLITERAL(Vector2){x, y};
 }
-
