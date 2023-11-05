@@ -11,6 +11,7 @@ struct Tetris {
   void draw();
 
   bool isLockedOut();
+  void holdCurrent();
 
   TetriminoShape getNextShape();
   TetriminoShape getRandomShape();
@@ -28,7 +29,7 @@ struct Tetris {
 
   Maytrix maytrix;
   TetriminoShape holded_shape;
-  bool can_swapped;
+  bool can_hold;
   std::list<TetriminoShape> bag;
   Time::IncrementalTimer classic_drop_timer;
   Time::IncrementalTimer locked_down_timer;

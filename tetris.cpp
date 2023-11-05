@@ -18,16 +18,23 @@ void Tetris::update() {
   }
 
   static int shape = 1;
-  if (IsKeyPressed(KEY_C)) { shape--; }
-  if (IsKeyPressed(KEY_V)) { shape++; }
+  if (IsKeyPressed(KEY_S)) { shape--; }
+  if (IsKeyPressed(KEY_D)) { shape++; }
   if (shape >= (int)TetriminoShape::Last) { shape = 1; }
   if (shape <= 0) { shape = (int)TetriminoShape::Last-1; }
+  if (IsKeyPressed(KEY_V)) {
+    this->maytrix.tetrimino.swap(this->getNextShape());
+    this->locked_down_timer.reset();
+    this->classic_drop_timer.restart();
+  }
 
-  if (IsKeyPressed(KEY_C) || IsKeyPressed(KEY_V)) {
+  if (IsKeyPressed(KEY_S) || IsKeyPressed(KEY_D)) {
     this->maytrix.tetrimino.swap((TetriminoShape)shape);
     this->locked_down_timer.reset();
     this->classic_drop_timer.restart();
   }
+
+  if (IsKeyPressed(KEY_C)) { this->holdCurrent(); }
   if (IsKeyPressed(KEY_Z)) { this->maytrix.tetriminoRotate(Rotate::CW); }
   if (IsKeyPressed(KEY_X)) { this->maytrix.tetriminoRotate(Rotate::CCW); }
 
@@ -80,8 +87,9 @@ void Tetris::startLockedDown(Time::us delay, bool force) {
 }
 
 void Tetris::draw() {
-  float total_height = mino_size/2.0f + mino_size*20.0f;
-  float total_width  = mino_size*10.0f;
+  float extra_height = this->mino_size/2.0f;
+  float total_height = extra_height + this->mino_size*20.0f;
+  float total_width  = this->mino_size*10.0f;
   Rectangle rect = {
     .x = this->offset.x,
     .y = this->offset.y,
@@ -97,7 +105,7 @@ void Tetris::draw() {
     if (!i || i >= this->maytrix.rowLength()-1) {
       continue;
     }
-    rect.x = i * mino_size - 1 + this->offset.x;
+    rect.x = i * this->mino_size - 1 + this->offset.x;
     DrawRectangleRec(rect, BLACK);
   }
 
@@ -106,16 +114,19 @@ void Tetris::draw() {
   rect.width = total_width;
   rect.height = 2;
   for (int i = 0; i < 20; i++) {
-    rect.y = i * mino_size + (mino_size/2) - 1 + this->offset.y;
+    rect.y = i * this->mino_size + (extra_height) - 1 + this->offset.y;
     DrawRectangleRec(rect, BLACK);
   }
-
+  
   // ---- BufferMinos ----
   for (auto [row, col, mino] : this->maytrix) {
     if (mino) {
       DrawRectangleV(
-          this->calculateMinoPosition(this->offset.x, this->offset.y, col, row, mino_size),
-              CLITERAL(Vector2){mino_size, mino_size}, MINO_DATA(mino).color);
+          this->calculateMinoPosition(
+            this->offset.x, this->offset.y,
+            col, row, this->mino_size),
+          CLITERAL(Vector2){this->mino_size, this->mino_size},
+          MINO_DATA(mino).color);
     }
   }
 
@@ -124,13 +135,15 @@ void Tetris::draw() {
     auto tetrimino_draw = [this]() {
       // char buffer[12];
       for (auto [row, col, mino] : this->maytrix.tetrimino) {
-        Vector2 pos =
-          this->calculateMinoPosition(
-            this->offset.x, this->offset.y,
-            col + this->maytrix.tetrimino.column, row + this->maytrix.tetrimino.row,
-            mino_size);
         if (mino) {
-          DrawRectangleV(pos, CLITERAL(Vector2)({mino_size, mino_size}), this->maytrix.tetrimino.color);
+          Vector2 pos =
+            this->calculateMinoPosition(
+              this->offset.x, this->offset.y,
+              col + this->maytrix.tetrimino.column, row + this->maytrix.tetrimino.row,
+              this->mino_size);
+          DrawRectangleV(pos,
+              CLITERAL(Vector2)({this->mino_size, this->mino_size}),
+              this->maytrix.tetrimino.color);
         }
         // sprintf(buffer, "%d:%d",
         //     col + this->maytrix.tetrimino.column,
@@ -152,6 +165,71 @@ void Tetris::draw() {
   if (game_over) {
     DrawText("Game Over", 0, 0, 16, BLUE);
   }
+
+  // ---- Queue Border ----
+  Rectangle lr_rect = {
+    .x = this->offset.x,
+    .y = this->offset.y,
+    .width = this->mino_size*6,
+    .height = this->mino_size*10 + this->mino_size*2,
+  };
+  DrawRectangleV(
+      { lr_rect.x - lr_rect.width, lr_rect.y },
+      { lr_rect.width, this->mino_size },
+      BLACK);
+  DrawRectangleV(
+      { lr_rect.x + total_width, lr_rect.y },
+      { lr_rect.width, this->mino_size },
+      BLACK);
+  DrawText("Hold", lr_rect.x - lr_rect.width + 1, lr_rect.y + 1, this->mino_size - 2, WHITE);
+  DrawText("Next", lr_rect.x + total_width + 1, lr_rect.y + 1, this->mino_size - 2, WHITE);
+
+  lr_rect.x -= lr_rect.width; 
+  lr_rect.y += this->mino_size; 
+  lr_rect.height = this->mino_size*4; 
+  DrawRectangleLinesEx(lr_rect, 1, BLACK);
+  lr_rect.x = this->offset.x + total_width;
+  lr_rect.height = this->mino_size*16;
+  DrawRectangleLinesEx(lr_rect, 1, BLACK);
+
+  auto tetrimino_draw = [this, &lr_rect](Vector2 offset, bool colored, TetriminoShape shape) {
+    auto data = MINO_DATA(shape);
+    int len = data.data.size();
+    float width = len * this->mino_size;
+    offset.x += (lr_rect.width - width) / 2;
+    switch (len) {
+      case 2:
+      case 3:
+        offset.y -= this->mino_size;
+        break;
+      case 4:
+        offset.y -= this->mino_size*2;
+        break;
+    }
+
+    for (int i = 0; i < len; i++) {
+      for (int j = 0; j < len; j++) {
+        if (data.data[i][j]) {
+          DrawRectangleV(
+              { offset.x + this->mino_size*(j),
+                offset.y + this->mino_size*(len-i), },
+              { this->mino_size, this->mino_size },
+              colored ? data.color : GRAY);
+        }
+      }
+    }
+  };
+  tetrimino_draw({
+    .x = this->offset.x - lr_rect.width,
+    .y = this->offset.y + this->mino_size*2,
+  }, this->can_hold, this->holded_shape);
+  for (int i = 0; auto shape : this->bag) {
+    tetrimino_draw({
+        .x = this->offset.x + total_width,
+        .y = this->offset.y + this->mino_size*2 + (this->mino_size*2*i) + (this->mino_size*i),
+      }, true, shape);
+    i += 1;
+  }
 }
 
 
@@ -167,6 +245,17 @@ bool Tetris::isLockedOut() {
     }
   }
   return this->maytrix.tetrimino.row + mino_ypos >= 20;
+}
+
+void Tetris::holdCurrent() {
+  if (!can_hold) {
+    return;
+  }
+  auto current_shape = this->maytrix.tetrimino.shape;
+  auto holded_shape = this->holded_shape;
+  this->maytrix.tetrimino.swap(holded_shape);
+  this->holded_shape = current_shape;
+  this->can_hold = false;
 }
 
 
@@ -217,6 +306,7 @@ void Tetris::resetTimers() {
         this->maytrix.removeClearedLines();
         this->locked_down_timer.reset();
         this->classic_drop_timer.restart();
+        this->can_hold = true;
       });
   this->classic_drop_timer.setCallback(
       [this](Time::IncrementalTimer &timer){
@@ -233,8 +323,10 @@ void Tetris::resetTimers() {
 }
 
 void Tetris::restart() {
+  this->can_hold = true;
   this->game_over = false;
   this->resetTimers();
+  this->bag.clear();
   this->fillBag();
   this->maytrix.restart();
   this->maytrix.tetrimino.swap(this->getRandomShape());
@@ -244,7 +336,7 @@ void Tetris::restart() {
 
 
 void Tetris::fillBag() {
-  while (this->bag.size() < 8) {
+  while (this->bag.size() < 5) {
     this->bag.push_back(this->getRandomShape());
   }
 }

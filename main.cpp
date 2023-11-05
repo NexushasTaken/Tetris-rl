@@ -4,19 +4,17 @@
 #include "tetris.hpp"
 
 int main() {
-  int mino_size = 20;
+  int mino_size = 18;
   const int rows = 20;
   const int columns = 10;
-  int width = mino_size*columns;
-  int height = (mino_size/2 + mino_size*rows);
-  float padding = width/2.0f;
-  Vector2 offset = { (float)padding, padding };
-  width += padding*2;
-  height += padding*2;
+  int field_width = mino_size*columns;
+  int field_height = mino_size/2 + mino_size*rows;
+  float pad_lr = mino_size*6;
+  Vector2 field_offset = { pad_lr, 0, };
 
-  InitWindow(width, height, "Tetris");
+  InitWindow(field_width + pad_lr*2, field_height, "Tetris");
   SetWindowState(FLAG_WINDOW_RESIZABLE);
-  Tetris tetris(mino_size, offset);
+  Tetris tetris(mino_size, field_offset);
 
   while (!WindowShouldClose()) {
     tetris.update();
