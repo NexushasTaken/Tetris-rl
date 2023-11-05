@@ -220,15 +220,18 @@ void Tetris::draw() {
     }
   };
   tetrimino_draw({
-    .x = this->offset.x - lr_rect.width,
-    .y = this->offset.y + this->mino_size*2,
-  }, this->can_hold, this->holded_shape);
-  for (int i = 0; auto shape : this->bag) {
-    tetrimino_draw({
-        .x = this->offset.x + total_width,
-        .y = this->offset.y + this->mino_size*2 + (this->mino_size*2*i) + (this->mino_size*i),
-      }, true, shape);
-    i += 1;
+      .x = this->offset.x - lr_rect.width,
+      .y = this->offset.y + this->mino_size*2,
+    }, this->can_hold, this->holded_shape);
+  {
+    int i = 0;
+    for (TetriminoShape shape : this->bag) {
+      tetrimino_draw({
+          .x = this->offset.x + total_width,
+          .y = this->offset.y + this->mino_size*2 + (this->mino_size*2*i) + (this->mino_size*i),
+        }, true, shape);
+      i += 1;
+    }
   }
 }
 

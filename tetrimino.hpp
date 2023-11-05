@@ -85,9 +85,6 @@ inline std::array<__MinoData, (int)TetriminoShape::Last> __mino_data = {
 
 // tm = tetrimino
 struct Tetrimino {
-  Tetrimino() = default;
-  Tetrimino(TetriminoShape type);
-
   void move(Axis dt, int count);
   void rotate(Rotate rotate);
   void flip(Axis flip);

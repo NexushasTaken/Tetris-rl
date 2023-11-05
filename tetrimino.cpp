@@ -9,10 +9,6 @@
 #include "axis.hpp"
 #include "rotation.hpp"
 
-Tetrimino::Tetrimino(TetriminoShape shape) {
-  this->swap(shape);
-}
-
 int Tetrimino::at(int col, int row) {
   return this->data[row][col];
 }
@@ -46,7 +42,7 @@ void Tetrimino::swap(TetriminoShape shape) {
   this->row = mino_data.row;
   this->shape = shape;
   this->color = mino_data.color;
-  auto &data = mino_data.data;
+  const auto &data = mino_data.data;
   this->data = std::vector(data.begin(), data.end());
 }
 

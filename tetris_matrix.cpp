@@ -6,36 +6,22 @@
 #include "axis.hpp"
 
 Maytrix::Maytrix() {
-  // this->buffer_area = BufferArea(44, std::vector<int>(10));
-  this->buffer_area = {
-    {0,1,1,2,3,4,4,5,5,6},
-    {0,1,2,2,3,4,5,5,6,6},
-    {0,0,0,2,3,4,0,0,6,3},
-    {0,0,0,0,3,0,0,0,0,3},
-    {0,0,0,0,0,0,0,0,0,3},
-    {0,0,0,0,0,0,0,0,0,3},
-  };
-  while (this->buffer_area.size() < 44) {
-    this->buffer_area.push_back(std::vector<int>(10));
-  }
+  this->buffer_area = BufferArea(44, std::vector<int>(10));
 }
 
 void Maytrix::removeClearedLines() {
   int last_line = 0;
-  for (int i = 0; i < this->buffer_area.size(); i++) {
-    bool isfull = false;
-    for (auto mino : this->buffer_area[i]) {
-      isfull = mino > 0;
-      if (!isfull) { break; }
-    }
+  for (std::vector<int> &line : this->buffer_area) {
+    bool isfull =
+      std::find_if(
+          line.begin(), line.end(),
+          [](auto mino) { return mino == 0; }) == line.end();
 
     if (isfull) {
-      for (auto &mino : this->buffer_area[i]) { mino = 0; }
+      std::fill(line.begin(), line.end(), 0);
     } else {
-      if (i != last_line) {
-        for (int j = 0; j < this->buffer_area[0].size(); j++) {
-          this->buffer_area[last_line][j] = this->buffer_area[i][j];
-        }
+      if (this->buffer_area[last_line].begin() != line.begin()) {
+        std::copy(line.begin(), line.end(), this->buffer_area[last_line].begin());
       }
       last_line++;
     }
@@ -71,7 +57,7 @@ bool Maytrix::tetriminoIsCollided() {
 }
 
 bool Maytrix::isMinoOccupied(int row, int col) {
-  if (row < 0 || col < 0 || row >= this->buffer_area.size() || col >= this->buffer_area.size()) {
+  if (row < 0 || col < 0 || row >= this->rowLength() || col >= this->columnLength()) {
     return true;
   }
   return this->buffer_area[row][col];
@@ -89,9 +75,7 @@ void Maytrix::tetriminoPlace(TetriminoShape next) {
 
 void Maytrix::restart() {
   for (auto &line : this->buffer_area) {
-    for (auto &mino : line) {
-      mino = 0;
-    }
+    std::fill(line.begin(), line.end(), 0);
   }
 }
 
