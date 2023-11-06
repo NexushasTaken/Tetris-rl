@@ -20,16 +20,16 @@ void Tetris::update() {
   static int shape = 1;
   if (IsKeyPressed(KEY_S)) { shape--; }
   if (IsKeyPressed(KEY_D)) { shape++; }
-  if (shape >= (int)TetriminoShape::Last) { shape = 1; }
-  if (shape <= 0) { shape = (int)TetriminoShape::Last-1; }
+  if (shape >= TMinoShape_Last) { shape = 1; }
+  if (shape <= 0) { shape = TMinoShape_Last-1; }
   if (IsKeyPressed(KEY_V)) {
-    this->maytrix.tetrimino.swap(this->getNextShape());
+    this->maytrix.piece.swap(this->getNextShape());
     this->locked_down_timer.reset();
     this->classic_drop_timer.restart();
   }
 
   if (IsKeyPressed(KEY_S) || IsKeyPressed(KEY_D)) {
-    this->maytrix.tetrimino.swap((TetriminoShape)shape);
+    this->maytrix.piece.swap((TMinoShape)shape);
     this->locked_down_timer.reset();
     this->classic_drop_timer.restart();
   }
@@ -134,16 +134,16 @@ void Tetris::draw() {
   if (!this->game_over) {
     auto tetrimino_draw = [this]() {
       // char buffer[12];
-      for (auto [row, col, mino] : this->maytrix.tetrimino) {
+      for (auto [row, col, mino] : this->maytrix.piece) {
         if (mino) {
           Vector2 pos =
             this->calculateMinoPosition(
               this->offset.x, this->offset.y,
-              col + this->maytrix.tetrimino.column, row + this->maytrix.tetrimino.row,
+              col + this->maytrix.piece.column, row + this->maytrix.piece.row,
               this->mino_size);
           DrawRectangleV(pos,
               CLITERAL(Vector2)({this->mino_size, this->mino_size}),
-              this->maytrix.tetrimino.color);
+              this->maytrix.piece.color);
         }
         // sprintf(buffer, "%d:%d",
         //     col + this->maytrix.tetrimino.column,
@@ -156,9 +156,9 @@ void Tetris::draw() {
     // ---- Ghost Tetrimino ----
     int move_count = this->maytrix.moveToSurface();
     if (move_count) {
-      this->maytrix.tetrimino.color.a = 150;
+      this->maytrix.piece.color.a = 150;
       tetrimino_draw();
-      this->maytrix.tetrimino.color.a = 255;
+      this->maytrix.piece.color.a = 255;
       this->maytrix.moveToRow(move_count);
     }
   }
@@ -192,7 +192,7 @@ void Tetris::draw() {
   lr_rect.height = this->mino_size*16;
   DrawRectangleLinesEx(lr_rect, 1, BLACK);
 
-  auto tetrimino_draw = [this, &lr_rect](Vector2 offset, bool colored, TetriminoShape shape) {
+  auto tetrimino_draw = [this, &lr_rect](Vector2 offset, bool colored, TMinoShape shape) {
     auto data = MINO_DATA(shape);
     int len = data.data.size();
     float width = len * this->mino_size;
@@ -225,7 +225,7 @@ void Tetris::draw() {
     }, this->can_hold, this->holded_shape);
   {
     int i = 0;
-    for (TetriminoShape shape : this->bag) {
+    for (TMinoShape shape : this->bag) {
       tetrimino_draw({
           .x = this->offset.x + total_width,
           .y = this->offset.y + this->mino_size*2 + (this->mino_size*2*i) + (this->mino_size*i),
@@ -241,40 +241,36 @@ bool Tetris::isLockedOut() {
     return false;
   }
   int mino_ypos = 0;
-  for (auto [row, col, mino] : this->maytrix.tetrimino) {
+  for (auto [row, col, mino] : this->maytrix.piece) {
     if (mino) {
       mino_ypos = row;
       break;
     }
   }
-  return this->maytrix.tetrimino.row + mino_ypos >= 20;
+  return this->maytrix.piece.row + mino_ypos >= 20;
 }
 
 void Tetris::holdCurrent() {
   if (!can_hold) {
     return;
   }
-  auto current_shape = this->maytrix.tetrimino.shape;
+  auto current_shape = this->maytrix.piece.shape;
   auto holded_shape = this->holded_shape;
-  this->maytrix.tetrimino.swap(holded_shape);
+  this->maytrix.piece.swap(holded_shape);
   this->holded_shape = current_shape;
   this->can_hold = false;
 }
 
 
-TetriminoShape Tetris::getNextShape() {
+TMinoShape Tetris::getNextShape() {
   auto next = this->bag.front();
   this->bag.pop_front();
   this->bag.push_back(this->getRandomShape());
   return next;
 }
 
-TetriminoShape Tetris::getRandomShape() {
-  int rand_shape =
-    this->random.randomInt(
-        (int)TetriminoShape::None+1,
-        (int)TetriminoShape::Last-1);
-  return (TetriminoShape)rand_shape;
+TMinoShape Tetris::getRandomShape() {
+  return this->random.randomInt(TMinoShape_None + 1, TMinoShape_Last - 1);
 }
 
 
@@ -332,7 +328,7 @@ void Tetris::restart() {
   this->bag.clear();
   this->fillBag();
   this->maytrix.restart();
-  this->maytrix.tetrimino.swap(this->getRandomShape());
+  this->maytrix.piece.swap(this->getRandomShape());
   this->holded_shape = this->getRandomShape();
   this->classic_drop_timer.start(1s);
 }

@@ -3,15 +3,15 @@
 #include <vector>
 #include <stack>
 #include "time.hpp"
-#include "tetrimino.hpp"
+#include "piece.hpp"
 #include "axis.hpp"
 #include "rotation.hpp"
 
 // Tetris Matrix
-struct Maytrix {
-  Maytrix();
+struct TMatrix {
+  TMatrix();
   bool tetriminoIsCollided();
-  void tetriminoPlace(TetriminoShape next);
+  void tetriminoPlace(TMinoShape next);
   void removeClearedLines();
   bool isMinoOccupied(int row, int col);
   // Return move count
@@ -28,9 +28,9 @@ struct Maytrix {
   int rowLength();
   int columnLength();
 
-  BufferAreaIterator begin();
-  BufferAreaIterator end();
+  Matrix2DIterator begin();
+  Matrix2DIterator end();
 
-  Tetrimino tetrimino;
-  BufferArea buffer_area;
+  Piece piece;
+  MatrixVec field_vec;
 };

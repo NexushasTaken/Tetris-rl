@@ -32,6 +32,7 @@ namespace Time {
     bool started = false;
   };
 
+  // Need a better name for this struct
   struct IncrementalTimer : Timer {
     using Callback = std::function<void(IncrementalTimer &timer)>;
     void start(Time::us delay);

@@ -3,7 +3,7 @@
 #include <list>
 #include "random.hpp"
 #include "time.hpp"
-#include "tetris_matrix.hpp"
+#include "tmatrix.hpp"
 
 struct Tetris {
   Tetris(float mino_size, Vector2 offset);
@@ -13,8 +13,8 @@ struct Tetris {
   bool isLockedOut();
   void holdCurrent();
 
-  TetriminoShape getNextShape();
-  TetriminoShape getRandomShape();
+  TMinoShape getNextShape();
+  TMinoShape getRandomShape();
 
   void setGameOver();
   void resetTimers();
@@ -27,10 +27,10 @@ struct Tetris {
       int column, int row,
       float mino_size);
 
-  Maytrix maytrix;
-  TetriminoShape holded_shape;
+  TMatrix maytrix;
+  TMinoShape holded_shape;
   bool can_hold;
-  std::list<TetriminoShape> bag;
+  std::list<TMinoShape> bag;
   Time::IncrementalTimer classic_drop_timer;
   Time::IncrementalTimer locked_down_timer;
   Time::IncrementalTimer soft_drop_timer;

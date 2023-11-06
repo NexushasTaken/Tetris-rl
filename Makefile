@@ -3,7 +3,7 @@ BUILD = build
 TEST = ${BUILD}/tests
 NAME=${BUILD}/${APPNAME}
 CC = c++
-SRCS = main.cpp tetris.cpp matrix_ds.cpp tetrimino.cpp tetris_matrix.cpp time.cpp random.cpp
+SRCS = main.cpp tetris.cpp matrix_ds.cpp piece.cpp tmatrix.cpp time.cpp random.cpp
 OBJS = ${SRCS:%.cpp=${BUILD}/%.o}
 CFLAGS = -ggdb -std=c++20 -MMD -MP
 LDFLAGS = -L/usr/local/lib -lm -lraylib

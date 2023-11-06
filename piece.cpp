@@ -4,23 +4,23 @@
 #include <cstdio>
 #include <cmath>
 #include <string>
-#include "tetrimino.hpp"
+#include "piece.hpp"
 #include "matrix_ds.hpp"
 #include "axis.hpp"
 #include "rotation.hpp"
 
-int Tetrimino::at(int col, int row) {
+int Piece::at(int col, int row) {
   return this->data[row][col];
 }
 
-int Tetrimino::length() {
+int Piece::length() {
   if (this->data.size() != this->data.at(0).size()) {
     throw std::runtime_error("data rows and columns lengths are not the same");
   }
   return this->data.size();
 }
 
-void Tetrimino::move(Axis dt, int count) {
+void Piece::move(Axis dt, int count) {
   switch (dt) {
     case Axis::Y:
       this->row += count;
@@ -33,9 +33,9 @@ void Tetrimino::move(Axis dt, int count) {
   }
 }
 
-void Tetrimino::swap(TetriminoShape shape) {
-  if ((int)shape < (int)TetriminoShape::None || (int)shape >= (int)TetriminoShape::Last) {
-    throw std::string("invalid shape: ") + std::to_string((int)shape);
+void Piece::swap(TMinoShape shape) {
+  if (shape < TMinoShape_None || shape >= TMinoShape_Last) {
+    throw std::string("invalid shape: ") + std::to_string(shape);
   }
   auto &mino_data = MINO_DATA(shape);
   this->shape = shape;
@@ -45,7 +45,7 @@ void Tetrimino::swap(TetriminoShape shape) {
   this->data = mino_data.data;
 }
 
-void Tetrimino::flip(Axis flip) {
+void Piece::flip(Axis flip) {
   int i, j, half, length;
 
   length = this->data.size();
@@ -61,8 +61,8 @@ void Tetrimino::flip(Axis flip) {
   }
 }
 
-void Tetrimino::rotate(Rotate rotate) {
-  std::vector<std::vector<int>> old_data(this->data.begin(), this->data.end());
+void Piece::rotate(Rotate rotate) {
+  MatrixVec old_data(this->data.begin(), this->data.end());
   int length = data.size();
 
   for (int i = 0; i < length; i++) {
@@ -77,10 +77,10 @@ void Tetrimino::rotate(Rotate rotate) {
   this->flip(Axis::Y);
 }
 
-BufferAreaIterator Tetrimino::begin() {
-  return BufferAreaIterator(&this->data);
+Matrix2DIterator Piece::begin() {
+  return Matrix2DIterator(&this->data);
 }
 
-BufferAreaIterator Tetrimino::end() {
-  return BufferAreaIterator(&this->data, this->data.size());
+Matrix2DIterator Piece::end() {
+  return Matrix2DIterator(&this->data, this->data.size());
 }

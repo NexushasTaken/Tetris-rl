@@ -8,30 +8,39 @@
 #include "axis.hpp"
 #include "rotation.hpp"
 
-enum struct TetriminoShape {
-  None, O, I, T, L, J, S, Z, Last,
+using TMinoShape = int;
+enum _TMinoShape {
+  TMinoShape_None,
+  TMinoShape_O,
+  TMinoShape_I,
+  TMinoShape_T,
+  TMinoShape_L,
+  TMinoShape_J,
+  TMinoShape_S,
+  TMinoShape_Z,
+  TMinoShape_Last
 };
 
 #define LIGHTBLUE (CLITERAL(Color){ 173, 216, 230, 255 })
 
 struct __MinoData {
-  TetriminoShape type;
+  int type;
   Color color;
-  BufferArea data;
+  MatrixVec data;
   int row, column;
 };
 
-inline std::array<__MinoData, (int)TetriminoShape::Last> __mino_data = {
-  CLITERAL(__MinoData)({TetriminoShape::None, CLITERAL(Color){0,0,0,0}, {}, 0, 0}),
+inline std::array<__MinoData, TMinoShape_Last> __mino_data = {
+  CLITERAL(__MinoData)({TMinoShape_None, CLITERAL(Color){0,0,0,0}, {}, 0, 0}),
   CLITERAL(__MinoData)({
-      TetriminoShape::O, YELLOW,
+      TMinoShape_O, YELLOW,
       {
         {1, 1},
         {1, 1},
       }, 20, 4,
     }),
   CLITERAL(__MinoData)({
-      TetriminoShape::I, LIGHTBLUE,
+      TMinoShape_I, LIGHTBLUE,
       {
         {0,0,0,0},
         {1,1,1,1},
@@ -40,7 +49,7 @@ inline std::array<__MinoData, (int)TetriminoShape::Last> __mino_data = {
       }, 19, 3,
     }),
   CLITERAL(__MinoData)({
-      TetriminoShape::T, PURPLE,
+      TMinoShape_T, PURPLE,
       {
         {0,0,0},
         {1,1,1},
@@ -48,7 +57,7 @@ inline std::array<__MinoData, (int)TetriminoShape::Last> __mino_data = {
       }, 19, 3,
     }),
   CLITERAL(__MinoData)({
-      TetriminoShape::L, ORANGE,
+      TMinoShape_L, ORANGE,
       {
         {0,0,0},
         {1,1,1},
@@ -56,7 +65,7 @@ inline std::array<__MinoData, (int)TetriminoShape::Last> __mino_data = {
       }, 19, 3,
     }),
   CLITERAL(__MinoData)({
-      TetriminoShape::J, DARKBLUE,
+      TMinoShape_J, DARKBLUE,
       {
         {0,0,0},
         {1,1,1},
@@ -64,7 +73,7 @@ inline std::array<__MinoData, (int)TetriminoShape::Last> __mino_data = {
       }, 19, 3,
     }),
   CLITERAL(__MinoData)({
-      TetriminoShape::S, GREEN,
+      TMinoShape_S, GREEN,
       {
         {0,0,0},
         {0,1,1},
@@ -72,7 +81,7 @@ inline std::array<__MinoData, (int)TetriminoShape::Last> __mino_data = {
       }, 19, 3,
     }),
   CLITERAL(__MinoData)({
-      TetriminoShape::Z, RED,
+      TMinoShape_Z, RED,
       {
         {0,0,0},
         {1,1,0},
@@ -83,19 +92,18 @@ inline std::array<__MinoData, (int)TetriminoShape::Last> __mino_data = {
 
 #define MINO_DATA(T) (__mino_data[(int)T])
 
-// tm = tetrimino
-struct Tetrimino {
+struct Piece {
   void move(Axis dt, int count);
   void rotate(Rotate rotate);
   void flip(Axis flip);
-  void swap(TetriminoShape type);
+  void swap(TMinoShape type);
   int at(int col, int row);
   int length();
-  BufferAreaIterator begin();
-  BufferAreaIterator end();
+  Matrix2DIterator begin();
+  Matrix2DIterator end();
 
   int column, row;
   Color color;
-  TetriminoShape shape;
-  BufferArea data;
+  TMinoShape shape;
+  MatrixVec data;
 };
