@@ -38,12 +38,11 @@ void Tetrimino::swap(TetriminoShape shape) {
     throw std::string("invalid shape: ") + std::to_string((int)shape);
   }
   auto &mino_data = MINO_DATA(shape);
+  this->shape = shape;
   this->column = mino_data.column;
   this->row = mino_data.row;
-  this->shape = shape;
   this->color = mino_data.color;
-  const auto &data = mino_data.data;
-  this->data = std::vector(data.begin(), data.end());
+  this->data = mino_data.data;
 }
 
 void Tetrimino::flip(Axis flip) {
